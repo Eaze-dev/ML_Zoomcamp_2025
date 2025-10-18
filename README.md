@@ -1,10 +1,4 @@
-
-
-
 # Homeworks
-
-
-
 ---
 ## Homework 1
 ### Getting the Data
@@ -220,4 +214,102 @@ Options:
 - 5.15
 - 51.5
 
-```
+
+# Homework 04: Bank Marketing Dataset Analysis
+
+**Note**: Sometimes your answer may not match one of the options exactly. That's fine. Select the option that's closest to your solution.
+
+In this homework, we will use the **Bank Marketing dataset** for lead scoring. [Download it here](<https://raw.githubusercontent.com/alexeygrigorev/datasets/master/course_lead_scoring.csv>).
+
+The target variable for the classification task is `converted` - whether the client signed up to the platform or not.
+
+## Data Preparation
+- **Check for missing values** in the features.
+- If missing values exist:
+  - For **categorical features**, replace them with `'NA'`.
+  - For **numerical features**, replace them with `0.0`.
+- Split the data into three parts: **train/validation/test** with a **60%/20%/20%** distribution using the `train_test_split` function with `random_state=1`.
+
+## Question 1: ROC AUC Feature Importance
+ROC AUC can be used to evaluate the feature importance of numerical variables. For each numerical variable:
+- Use it as the score (aka prediction) and compute the AUC with the `converted` variable as the ground truth.
+- Use the **training dataset** for this.
+- If the AUC is < 0.5, invert the variable by adding a negative sign (e.g., `-df_train['balance']`).
+  - AUC < 0.5 indicates the variable is negatively correlated with the target. Negating the variable converts negative correlation to positive.
+
+**Which numerical variable (among the following 4) has the highest AUC?**
+- `lead_score`
+- `number_of_courses_viewed`
+- `interaction_count`
+- `annual_income`
+
+## Question 2: Training the Model
+- Apply **one-hot encoding** using `DictVectorizer`.
+- Train a **logistic regression model** with the following parameters:
+  ```python
+  LogisticRegression(solver='liblinear', C=1.0, max_iter=1000)
+  ```
+- **What's the AUC of this model on the validation dataset?** (Round to 3 digits)
+  - 0.32
+  - 0.52
+  - 0.72
+  - 0.92
+
+## Question 3: Precision and Recall
+- Evaluate the model on all thresholds from **0.0 to 1.0** with a step of **0.01**.
+- For each threshold, compute **precision** and **recall**.
+- Plot the precision and recall curves.
+- **At which threshold do the precision and recall curves intersect?**
+  - 0.145
+  - 0.345
+  - 0.545
+  - 0.745
+
+## Question 4: F1 Score
+Precision and recall are conflicting metrics—when one increases, the other often decreases. The **F1 score** combines both using the formula:
+
+$$F_1 = 2 \cdot \frac{P \cdot R}{P + R}$$
+
+Where \( P \) is precision and \( R \) is recall.
+
+- Compute the F1 score for all thresholds from **0.0 to 1.0** with an increment of **0.01**.
+- **At which threshold is the F1 score maximal?**
+  - 0.14
+  - 0.34
+  - 0.54
+  - 0.74
+
+## Question 5: 5-Fold Cross-Validation
+- Use the `KFold` class from Scikit-Learn to evaluate the model on **5 different folds**:
+  ```python
+  KFold(n_splits=5, shuffle=True, random_state=1)
+  ```
+- For each fold:
+  - Split the data into train and validation.
+  - Train the model with:
+    ```python
+    LogisticRegression(solver='liblinear', C=1.0, max_iter=1000)
+    ```
+  - Use **AUC** to evaluate the model on the validation set.
+- **How large is the standard deviation of the scores across different folds?**
+  - 0.0001
+  - 0.006
+  - 0.06
+  - 0.36
+
+## Question 6: Hyperparameter Tuning
+- Use **5-fold cross-validation** to find the best parameter `C`.
+- Iterate over the following `C` values: `[0.000001, 0.001, 1]`.
+- Initialize `KFold` with the same parameters as in Question 5.
+- Use these parameters for the model:
+  ```python
+  LogisticRegression(solver='liblinear', C=C, max_iter=1000)
+  ```
+- Compute the **mean score** and **standard deviation** (round both to 3 decimal digits).
+- **Which `C` leads to the best mean score?**
+  - 0.000001
+  - 0.001
+  - 1
+
+**Note**: If there are ties, select the score with the lowest standard deviation. If ties persist, select the smallest `C`.
+
